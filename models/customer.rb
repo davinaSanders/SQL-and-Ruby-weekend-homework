@@ -1,4 +1,5 @@
 require_relative("../db/sql_runner")
+require_relative("ticket.rb")
 
 class Customer
 
@@ -46,6 +47,22 @@ class Customer
     @id = SqlRunner.run(sql, values).first["id"].to_i
   end
 
+  def buy_ticket
+    film_array = self.films()
+    film_array.each do |film| @funds -= film.price
+    self.update()
+    new_ticket = Ticket.new({"customer_id" => @id, "film_id" => film.id})
+    new_ticket.save()
+    end
+  end
+
+  def tickets()
+    sql = "SELECT tickets.* FROM tickets WHERE tickets.customer_id = $1"
+    values = [@id]
+    tickets = SqlRunner.run(sql, values)
+    p tickets
+    return tickets.count()
+  end
 
   def self.delete_all()
     sql = "DELETE FROM customers"
